@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# Author: Florian Guilbert
+
+import sys, os
+
+if '__main__' == __name__:
+    if len(sys.argv) < 2:
+        sys.stderr.write('Usage: ' + sys.argv[0] + ' tex_file\n')
+        exit(1)
+
+    texFile = sys.argv[1]
+    if texFile[-4:] != '.tex':
+        sys.stderr.write("The given file isn't a tex file\n")
+        exit(1)
+
+    outputBaseName = texFile[:-4]
+    files = os.listdir()
+
+    for m in ['Makefile', 'makefile']:
+        if files.count(m) != 0:
+            sys.stderr.write(m + ' already exists\n')
+            exit(1)
+
+    res = 'OUT = ' + outputBaseName + '\n\n$(OUT).pdf: $(OUT).tex\n' + '\tpdflatex $< ; pdflatex $<\n\n' + 'clean:\n\trm -f *.out *.nav *.log *.toc *.aux *~\n\n' + 'cleanall: clean\n\trm -f $(OUT).pdf\n'
+
+    try:
+        with open('Makefile', 'w') as fd:
+            fd.write(res)
+    except IOError as e:
+        sys.stderr.write(e)
